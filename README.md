@@ -40,7 +40,7 @@ https://github.com/user-attachments/assets/9985e790-60a4-434e-a34a-0e1c4f1fdace
 - **Selenium WebDriver** 🌐
 - **Pandas** 📊
 - **ReFramework** (Robotic Enterprise Framework) 🤖
-- **Docker & Docker Hub** 🐳
+- **Docker** 🐳
 - **WSL2 (Windows Subsystem for Linux 2)** 💻
 
 ---
