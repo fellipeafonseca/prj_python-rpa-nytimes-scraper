@@ -2,7 +2,7 @@
 
 ## 📌 Descrição
 
-Este projeto é uma automação RPA desenvolvida em **Python** seguindo o padrão **ReFramework**, utilizando **Selenium** para extrair notícias do site [The New York Times](https://www.nytimes.com/search).
+Este projeto é uma automação RPA desenvolvida em **Python** seguindo boas práticas, utilizando **Selenium** para extrair notícias do site [The New York Times](https://www.nytimes.com/search).
 
 Os dados extraídos são:
 
