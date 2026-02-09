@@ -1,176 +1,159 @@
 import pandas as pd
+import logging
+import re
+from datetime import datetime
+from urllib.parse import urlencode
+from dateutil.relativedelta import relativedelta
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from time import sleep
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
-from urllib.parse import urlencode
-import re
-import logging
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
-# Classe para gerenciar a configuração do projeto
+
+# ================= CONFIG ================= #
+
 class ConfigManager:
     def __init__(self, config_path="config.json"):
-        logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+        logging.basicConfig(
+            level=logging.INFO,
+            format="%(asctime)s - %(levelname)s - %(message)s"
+        )
         import json
-        with open(config_path, "r", encoding="utf-8") as file:
-            self.config = json.load(file)
-    
+        with open(config_path, "r", encoding="utf-8") as f:
+            self.config = json.load(f)
+
     def get(self, key):
-        return self.config.get(key, None)
+        return self.config.get(key)
 
-# Classe para gerenciar a extração de dados
+
+# ================= SCRAPER ================= #
+
 class NYTimesScraper:
-    def __init__(self, config):
-        
+    def __init__(self, config: ConfigManager):
         self.config = config
-        options = webdriver.ChromeOptions()
-       
-       # options.add_argument("--start-maximized")
-        
-        options.add_argument("--no-user-data-dir")     
-        options.add_argument("--headless")  # Rodar sem interface gráfica
-        options.add_argument("--no-sandbox")  # Necessário para rodar no Docker
-        options.add_argument("--disable-dev-shm-usage")  # Evita problemas de memória
-        options.add_argument('--dns-prefetch-disable')
-        options.add_argument('--disable-gpu')
-        options.add_argument('--enable-cdp-events')
-  
-        self.driver = webdriver.Chrome(options=options)
-    
 
+        options = Options()
+        options.add_argument("--headless=new")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--disable-gpu")
+
+        self.driver = webdriver.Chrome(options=options)
+        self.wait = WebDriverWait(self.driver, 15)
 
     def search_news(self):
-        url = self.config.get("url")
-        attempts = 0
-        max_attempts = 3
         news_list = []
-        regexDollars = r"(?:US\$|\$)\s?\d{1,3}(\.\d{3})*(,\d{1,2})?|(?<!\S)\d{1,3}(\.\d{3})*(,\d{1,2})?\s+dollars"
-        regexDate = r"\b\d{4}[-/]\d{2}[-/]\d{2}\b"
 
-        if self.config.get("meses") > 0:
-            startDate = datetime.now() - relativedelta(months=self.config.get("meses")-1)
-        else:
-            startDate = datetime.now() - relativedelta(months=self.config.get("meses"))
+        regex_money = r"(?:US\$|\$)\s?\d+"
+        regex_date = r"\b\d{4}[-/]\d{2}[-/]\d{2}\b"
 
-        startDate = datetime(startDate.year, startDate.month, 1)
-        startDate =  startDate.strftime("%Y-%m-%d")
-        endDate = datetime.now().strftime("%Y-%m-%d")
+        meses = self.config.get("meses")
+        start_date = datetime.now() - relativedelta(months=meses)
+        start_date = datetime(start_date.year, start_date.month, 1).strftime("%Y-%m-%d")
+        end_date = datetime.now().strftime("%Y-%m-%d")
 
-       
-        params = {"query":self.config.get("frase"), "startDate": startDate, "endDate": endDate,
-                  "lang":self.config.get("idioma"),  "types":self.config.get("tipo"), 
-                  "sort": self.config.get("ordenacao")}
-        
-        url = f"{url}?{urlencode(params)}"
-         
-        logging.info(f"Url de busca: {url}")  
+        params = {
+            "query": self.config.get("frase"),
+            "startDate": start_date,
+            "endDate": end_date,
+            "lang": self.config.get("idioma"),
+            "types": self.config.get("tipo"),
+            "sort": self.config.get("ordenacao"),
+        }
 
+        url = f"{self.config.get('url')}?{urlencode(params)}"
+        logging.info(f"URL de busca: {url}")
 
-        while attempts < max_attempts:
-            try:
-                self.driver.get(url)
-                sleep(3)
+        try:
+            self.driver.get(url)
 
+            self._handle_cookies()
+            self._expand_results()
 
-                if self.driver.find_elements(By.XPATH, "//button[text()='Reject all']"):
-                    input_box = self.driver.find_element(By.XPATH, "//button[text()='Reject all']")
-                    input_box.click()
+            articles = self.wait.until(
+                EC.presence_of_all_elements_located((By.CLASS_NAME, "css-1l4w6pd"))
+            )
 
-                sleep(2)
+            for article in articles:
+                title = article.find_element(By.CSS_SELECTOR, "h4").text
+                link = article.find_element(By.TAG_NAME, "a").get_attribute("href")
 
-                if self.driver.find_elements(By.XPATH, "//span[text()='Continue']"):
-                    input_box = self.driver.find_element(By.XPATH, "//span[text()='Continue']")
-                    input_box.click()
-                
-                sleep(2)
-                
-                # Expandindo as páginas de resultados encontrados
-                while self.driver.find_elements(By.XPATH, "//button[text()='Show More']"):
-                    input_box = self.driver.find_element(By.XPATH, "//button[text()='Show More']")
-                    input_box.click()
-                    sleep(2)
+                description = (
+                    article.find_element(By.CLASS_NAME, "css-e5tzus").text
+                    if article.find_elements(By.CLASS_NAME, "css-e5tzus")
+                    else ""
+                )
 
+                image = (
+                    article.find_element(By.TAG_NAME, "img").get_attribute("src")
+                    if article.find_elements(By.TAG_NAME, "img")
+                    else ""
+                )
 
-                articles = self.driver.find_elements(By.CLASS_NAME, "css-1l4w6pd")
-                
-                for article in articles:
-                    try:
-                        title = article.find_element(By.CSS_SELECTOR, "h4").text
-                        date = article.find_element(By.CSS_SELECTOR, "a").get_attribute("href")
-                        image = article.find_element(By.CLASS_NAME, "css-rq4mmj").get_attribute("src") if article.find_elements(By.CLASS_NAME, "css-rq4mmj") else ""
-                        description = article.find_element(By.CLASS_NAME, "css-e5tzus").text if article.find_elements(By.CLASS_NAME, "css-e5tzus") else ""
-                        
+                date_match = re.search(regex_date, link)
+                date = date_match.group(0) if date_match else ""
 
-                     
-                        # Extraindo data do link da notícia
-                        datas = re.search(regexDate, date)
-                        
-                        if datas == None:
-                            logging.debug(f"Url/link sem data de publicação: {date} Título: {title}")
-                            date = ""
-                        else:
-                            date = datas[0]
+                has_money = bool(re.search(regex_money, title + description))
+                ocorrencias = (title + description).lower().count(
+                    self.config.get("frase").lower()
+                )
 
-                        # Encontrar todas as correspondências de valores monetários dollars na "descrição" e no "título" da notícia
-                        matchesMoney = bool(re.search(regexDollars, title)) if bool(re.search(regexDollars, title)) else bool(re.search(regexDollars, description))
+                news_list.append({
+                    "Título": title,
+                    "Data": date,
+                    "Descrição": description,
+                    "Imagem": image,
+                    "Número de Ocorrências": ocorrencias,
+                    "Valor Monetário": has_money
+                })
 
-                        # Conta quantas vezes a frase aparece no texto, ignorando maiúsculas e minúsculas
-                        ocorrencias = title.lower().count(self.config.get("frase").lower()) + description.lower().count(self.config.get("frase").lower()) 
+        finally:
+            self.driver.quit()
 
-                        news_list.append({
-                            "Título": title,
-                            "Data": date,
-                            "Descrição": description,
-                            "Imagem": image,
-                            "Número de Ocorrência": ocorrencias,
-                            "Valor Monetário": matchesMoney
-                        })
-                    except Exception as e:
-                        logging.warning(f"Erro ao encontrar extrair dados da Notícia: {title} Mensagem: {e}")
-                        continue
-                
-                if news_list:
-                    break
-            except Exception as e:
-                logging.error(f"Tentativa {attempts + 1} falhou: {e}")
-                self.save_screenshot(f"error_attempt_{attempts + 1}.png")
-                attempts += 1
-                sleep(5)
-        
-        self.driver.quit()
         return news_list
 
+    def _handle_cookies(self):
+        try:
+            self.wait.until(
+                EC.element_to_be_clickable((By.XPATH, "//button[text()='Reject all']"))
+            ).click()
+        except:
+            pass
 
-    def save_screenshot(self, filename):
+    def _expand_results(self):
+        while True:
             try:
-                self.driver.save_screenshot(filename)
-                logging.info(f"Screenshot salva: {filename}")
-            except Exception as e:
-                logging.error(f"Erro ao salvar screenshot: {e}")
+                self.wait.until(
+                    EC.element_to_be_clickable((By.XPATH, "//button[text()='Show More']"))
+                ).click()
+            except:
+                break
 
-# Classe para gerenciar o armazenamento dos dados
+
+# ================= STORAGE ================= #
+
 class DataStorage:
     @staticmethod
-    def save_to_excel(data, file_name="noticias.xlsx"):
-        df = pd.DataFrame(data)
-        df.to_excel(file_name, index=False)
+    def save_to_excel(data, filename="noticias.xlsx"):
+        pd.DataFrame(data).to_excel(filename, index=False)
 
-# Classe principal do fluxo de trabalho
+
+# ================= BOT ================= #
+
 class NYTimesBot:
-    def __init__(self, config_path="config.json"):
-        self.config_manager = ConfigManager(config_path)
-        self.scraper = NYTimesScraper(self.config_manager)
-    
+    def __init__(self):
+        self.config = ConfigManager()
+        self.scraper = NYTimesScraper(self.config)
+
     def run(self):
-        logging.info("Buscando notícias...")
-        news_data = self.scraper.search_news()
-        logging.info(f"{len(news_data)} notícias encontradas!")
-        
-        logging.info("Salvando no Excel...")
-        DataStorage.save_to_excel(news_data)
-        logging.info("Processo concluído!")
+        logging.info("Iniciando busca de notícias...")
+        data = self.scraper.search_news()
+        logging.info(f"{len(data)} notícias encontradas")
+        DataStorage.save_to_excel(data)
+        logging.info("Processo finalizado com sucesso!")
+
 
 if __name__ == "__main__":
-    bot = NYTimesBot()
-    bot.run()
+    NYTimesBot().run()
