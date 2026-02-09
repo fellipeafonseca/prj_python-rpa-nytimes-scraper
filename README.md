@@ -15,7 +15,7 @@ Os dados extraídos são:
 
 
 
-As notícias são salvas e é gerado um arquivo **Excel** (`noticias.xlsx`) na raiz do projeto com dados extraídos.
+As notícias são salvas e é gerado um arquivo **Excel** (`noticias.csv`) na raiz do projeto com dados extraídos.
 
 ## 📽️ Demonstração
 
@@ -82,8 +82,8 @@ Abra o arquivo `config.json` e edite os valores conforme necessário:
 ```json
 {
    "url": "https://www.nytimes.com/search",
-    "frase": "technology", 
-    "meses": 1,
+    "frase": "grape", 
+    "meses": 0,
     "idioma": "en",
     "tipo": "article",
     "ordenacao":"newest"
@@ -106,40 +106,8 @@ python main.py
 
 ---
 
-## 🐳 Uso com Docker - https://hub.docker.com/repository/docker/fellipedockerfon/prj_python-automacao-noticias-newyorktimes-nytimes_scraper/general
-
-### 🔹 **1. Construir a Imagem Docker**
-
-```bash
-docker build -t prj_python-automacao-noticias-newyorktimes-nytimes_scraper .
-```
-
-### 🔹 **2. Executar o Container**
-
-```bash
-docker run --rm -v $(pwd)/output:/app/output prj_python-automacao-noticias-newyorktimes-nytimes_scraper
-```
-
-### 🔹 **3. Enviar a Imagem para o Docker Hub**
-
-```bash
-docker tag nytimes_scraper fellipedockerfon/prj_python-automacao-noticias-newyorktimes-nytimes_scraper:latest
-docker push fellipedockerfon/prj_python-automacao-noticias-newyorktimes-nytimes_scraper:latest
-```
-
-### 🔹 **4. Baixar e Executar em Outra Máquina**
-
-```bash
-docker pull fellipedockerfon/prj_python-automacao-noticias-newyorktimes-nytimes_scraper:latest
-docker run --rm fellipedockerfon/prj_python-automacao-noticias-newyorktimes-nytimes_scraper
-```
-
----
-
 ## 📝 Observações
 
-- Em caso de erro, uma captura de tela será salva na pasta do projeto.
-- É realizado até 3 tentativas para a extração de dados no site. 
 - Certifique-se de que o **ChromeDriver** está compatível com a versão do Google Chrome instalada.
 - Se o Docker não estiver rodando no **WSL2**, verifique as configurações no **Docker Desktop**.
 
