@@ -37,13 +37,20 @@ class NYTimesScraper:
         options = Options()
         options.add_argument("--headless=new")
         options.add_argument("--no-sandbox")
+      #  options.add_argument("--start-maximized")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--disable-gpu")
-
+        
+       
         self.driver = webdriver.Chrome(options=options)
         self.wait = WebDriverWait(self.driver, 15)
+        
+
+       
+
 
     def search_news(self):
+        logging.info("Iniciando busca de notícias...")
         news_list = []
 
         regex_money = r"(?:US\$|\$)\s?\d+"
@@ -67,14 +74,14 @@ class NYTimesScraper:
         logging.info(f"URL de busca: {url}")
 
         try:
+
             self.driver.get(url)
 
             self._handle_cookies()
             self._expand_results()
 
-            articles = self.wait.until(
-                EC.presence_of_all_elements_located((By.CLASS_NAME, "css-1l4w6pd"))
-            )
+            articles = self.driver.find_elements(By.XPATH, "//ol[@data-testid='search-results']/li[@class='kyt-wCDWp']")
+            logging.info(f"Notícias Encontradas: {len(articles)}")
 
             for article in articles:
                 title = article.find_element(By.CSS_SELECTOR, "h4").text
@@ -110,17 +117,18 @@ class NYTimesScraper:
                 })
 
         finally:
-            self.driver.quit()
+             self.driver.quit()
 
         return news_list
 
     def _handle_cookies(self):
         try:
             self.wait.until(
-                EC.element_to_be_clickable((By.XPATH, "//button[text()='Reject all']"))
+                EC.element_to_be_clickable((By.XPATH, "/html/body/div[1]/div/div[3]/div/div/div[2]/div[1]/button[2]"))
             ).click()
         except:
             pass
+  
 
     def _expand_results(self):
         while True:
@@ -136,8 +144,9 @@ class NYTimesScraper:
 
 class DataStorage:
     @staticmethod
-    def save_to_excel(data, filename="noticias.xlsx"):
-        pd.DataFrame(data).to_excel(filename, index=False)
+    def save_to_excel(data, filename="noticias.csv"):
+        logging.info(f"{len(data)} Salvando dados em arquivo...")
+        pd.DataFrame(data).to_csv(filename, index=False)
 
 
 # ================= BOT ================= #
@@ -148,9 +157,7 @@ class NYTimesBot:
         self.scraper = NYTimesScraper(self.config)
 
     def run(self):
-        logging.info("Iniciando busca de notícias...")
         data = self.scraper.search_news()
-        logging.info(f"{len(data)} notícias encontradas")
         DataStorage.save_to_excel(data)
         logging.info("Processo finalizado com sucesso!")
 

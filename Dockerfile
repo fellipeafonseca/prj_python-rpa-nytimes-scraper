@@ -54,6 +54,7 @@ RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd6
 WORKDIR /app
 COPY . .
 
+RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 CMD ["python", "main.py"]
