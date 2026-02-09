@@ -15,7 +15,7 @@ Os dados extraídos são:
 
 
 
-As notícias são salvas e é gerado um arquivo **Excel** (`noticias.csv`) na raiz do projeto com dados extraídos.
+As notícias são salvas e é gerado um arquivo (`noticias.csv`) na raiz do projeto com dados extraídos.
 
 ## 📽️ Demonstração
 
