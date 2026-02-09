@@ -29,7 +29,7 @@ https://github.com/user-attachments/assets/9985e790-60a4-434e-a34a-0e1c4f1fdace
 
 ### Execução via docker
 
-![Execucao Docker nytimes](https://github.com/user-attachments/assets/b5ad495c-e02a-45a8-84c1-55d9c0aee315)
+<img width="1358" height="473" alt="exec docker noticias" src="https://github.com/user-attachments/assets/85dcdf62-ee62-49c9-baa9-559a71ac0418" />
 
 
 ---
@@ -117,8 +117,6 @@ python main.py
 
 Melhorias futuras para implementação:
 - Estruturação melhor do reframework separando as responsabilidades em novas classes;
-- Utilização de imagem de Banco de Dados para salvar os arquivos gerados e/ou Envio por E-mail;
-- Utilização de Docker Secrets para armazenamento de usuário, senha e chaves de conexão no Dockerfile.
 
 Fique à vontade para abrir um **Pull Request** ou relatar problemas na aba **Issues**!
 
