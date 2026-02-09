@@ -81,12 +81,12 @@ Abra o arquivo `config.json` e edite os valores conforme necessário:
 
 ```json
 {
-   "url": "https://www.nytimes.com/search",
-    "frase": "grape", 
-    "meses": 0,
-    "idioma": "en",
-    "tipo": "article",
-    "ordenacao":"newest"
+   "url": "https://www.nytimes.com/search",  /* Link de Busca de dados*/
+    "frase": "grape",                        /*Palavra ou frase a ser procurada nas notícias*/
+    "meses": 0,                              /*Quantidade de meses anteriores para busca de notícias*/
+    "idioma": "en",                        /*idioma*/
+    "tipo": "article",                     /*Tipo de notícias a serem procuradas*/
+    "ordenacao":"newest"                  /*Ordenação dos resultados newest (mais novo)*/
 }
 ```
 
