@@ -116,6 +116,19 @@ python main.py
 ## 🏆 Contribuições
 
 Melhorias futuras para implementação:
+- Criar um microserviço de API + Banco de Dados para salvar os dados extraídos. Deixando uma estrutura dessa forma:
+  
+- [ Scraper (Docker + Selenium) ]
+              │
+              ▼
+        HTTP POST (JSON)
+              │
+              ▼
+[ API FastAPI (Docker) ]
+              │
+              ▼
+        Banco de Dados
+  
 - Estruturação melhor do reframework separando as responsabilidades em novas classes;
 
 Fique à vontade para abrir um **Pull Request** ou relatar problemas na aba **Issues**!
