@@ -90,18 +90,13 @@ Abra o arquivo `config.json` e edite os valores conforme necessário:
 }
 ```
 
-### 🔹 **4. Executar Localmente**
+### 🔹 **4. Executar no Docker**
 
-Instale as dependências:
+Ter instalado o Docker na sua máquina (https://docs.docker.com/desktop/setup/install/windows-install/), após isso rodar: 
 
-```bash
-pip install -r requirements.txt
-```
-
-Rode o script principal:
-
-```bash
-python main.py
+```powershell
+docker compose build
+docker compose up
 ```
 
 ---
