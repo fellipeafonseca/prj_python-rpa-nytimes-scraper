@@ -111,7 +111,7 @@ docker compose up
 ## 🏆 Contribuições
 
 Melhorias futuras para implementação:
-- Criar um microserviço de API + Banco de Dados para salvar os dados extraídos. Deixando uma estrutura dessa forma:
+- Criar um microserviço de API + Banco de Dados para salvar os dados extraídos (https://github.com/fellipeafonseca/prj_python-api-nytimes). Deixando uma estrutura dessa forma:
 
 ```  
 - [ Scraper (Docker + Selenium) ]
