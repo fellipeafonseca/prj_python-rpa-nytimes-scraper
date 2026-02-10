@@ -117,7 +117,8 @@ python main.py
 
 Melhorias futuras para implementação:
 - Criar um microserviço de API + Banco de Dados para salvar os dados extraídos. Deixando uma estrutura dessa forma:
-  
+
+```  
 - [ Scraper (Docker + Selenium) ]
               │
               ▼
@@ -128,6 +129,7 @@ Melhorias futuras para implementação:
               │
               ▼
         Banco de Dados
+```
   
 - Estruturação melhor do reframework separando as responsabilidades em novas classes;
 
