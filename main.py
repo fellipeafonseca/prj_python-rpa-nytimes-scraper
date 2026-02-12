@@ -4,23 +4,33 @@ import re
 from datetime import datetime
 from urllib.parse import urlencode
 from dateutil.relativedelta import relativedelta
+import os
+import requests
+from dotenv import load_dotenv
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-
+from api_client import send_news_to_api
+import json
 
 # ================= CONFIG ================= #
+API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
 
 class ConfigManager:
     def __init__(self, config_path="config.json"):
+
+       
+        load_dotenv()
+
+        
         logging.basicConfig(
             level=logging.INFO,
             format="%(asctime)s - %(levelname)s - %(message)s"
         )
-        import json
+        
         with open(config_path, "r", encoding="utf-8") as f:
             self.config = json.load(f)
 
@@ -102,18 +112,29 @@ class NYTimesScraper:
                 date_match = re.search(regex_date, link)
                 date = date_match.group(0) if date_match else ""
 
+                date = date.replace('/', '-')
+
                 has_money = bool(re.search(regex_money, title + description))
                 ocorrencias = (title + description).lower().count(
                     self.config.get("frase").lower()
                 )
 
+   #             news_list.append({
+    #                "Título": title,
+     #               "Data": date,
+       #             "Descrição": description,
+      #              "Imagem": image,
+        #            "Número de Ocorrências": ocorrencias,
+        #            "Valor Monetário": has_money
+         #       })
+
+                
                 news_list.append({
-                    "Título": title,
-                    "Data": date,
-                    "Descrição": description,
-                    "Imagem": image,
-                    "Número de Ocorrências": ocorrencias,
-                    "Valor Monetário": has_money
+                    "title": title,
+                    "published_at": date,
+                    "category": description,
+                    "url": image,
+                 
                 })
 
         finally:
@@ -158,6 +179,10 @@ class NYTimesBot:
 
     def run(self):
         data = self.scraper.search_news()
+        for news in data:
+            print(news)
+            send_news_to_api(news, API_BASE_URL)
+
         DataStorage.save_to_excel(data)
         logging.info("Processo finalizado com sucesso!")
 

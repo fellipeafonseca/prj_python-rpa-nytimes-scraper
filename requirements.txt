@@ -1,4 +1,6 @@
 selenium>=4.20.0
 pandas==2.2.1
+requests
+python-dotenv
 openpyxl==3.1.2
 python-dateutil==2.9.0
