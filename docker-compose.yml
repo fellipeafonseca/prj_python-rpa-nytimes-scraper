@@ -1,9 +1,0 @@
-services:
-  nytimes_scraper:
-    build: .
-    container_name: nytimes_scraper
-    env_file:
-      - .env
-    volumes:
-      - .:/app
-    working_dir: /app

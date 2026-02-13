@@ -45,9 +45,11 @@ class NYTimesScraper:
         self.config = config
 
         options = Options()
+        #Não comentar para enviar no docker
         options.add_argument("--headless=new")
         options.add_argument("--no-sandbox")
-      #  options.add_argument("--start-maximized")
+        # comentar para enviar docker
+        #options.add_argument("--start-maximized")
         options.add_argument("--disable-dev-shm-usage")
         options.add_argument("--disable-gpu")
         
@@ -60,7 +62,7 @@ class NYTimesScraper:
 
 
     def search_news(self):
-        logging.info("Iniciando busca de notícias...")
+        
         news_list = []
 
         regex_money = r"(?:US\$|\$)\s?\d+"
@@ -96,6 +98,7 @@ class NYTimesScraper:
             for article in articles:
                 title = article.find_element(By.CSS_SELECTOR, "h4").text
                 link = article.find_element(By.TAG_NAME, "a").get_attribute("href")
+            
 
                 description = (
                     article.find_element(By.CLASS_NAME, "css-e5tzus").text
@@ -118,7 +121,7 @@ class NYTimesScraper:
                 ocorrencias = (title + description).lower().count(
                     self.config.get("frase").lower()
                 )
-
+                link = link.split('?')[0]
    #             news_list.append({
     #                "Título": title,
      #               "Data": date,
@@ -132,8 +135,8 @@ class NYTimesScraper:
                 news_list.append({
                     "title": title,
                     "published_at": date,
-                    "category": description,
-                    "url": image,
+                    "category": self.config.get("tipo"),
+                    "url": link,
                  
                 })
 
@@ -166,7 +169,6 @@ class NYTimesScraper:
 class DataStorage:
     @staticmethod
     def save_to_excel(data, filename="noticias.csv"):
-        logging.info(f"{len(data)} Salvando dados em arquivo...")
         pd.DataFrame(data).to_csv(filename, index=False)
 
 
@@ -178,12 +180,15 @@ class NYTimesBot:
         self.scraper = NYTimesScraper(self.config)
 
     def run(self):
+        logging.info("Iniciando busca de notícias...")
         data = self.scraper.search_news()
+
+        logging.info(f"{len(data)} Enviando dados para api...")
         for news in data:
-            print(news)
+            logging.info(f"{news}")
             send_news_to_api(news, API_BASE_URL)
 
-        DataStorage.save_to_excel(data)
+        #DataStorage.save_to_excel(data)
         logging.info("Processo finalizado com sucesso!")
 
 
