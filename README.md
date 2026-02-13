@@ -9,9 +9,8 @@ Os dados extraídos são:
 - **Título da notícia**
 - **Data da publicação**
 - **Descrição**
-- **Imagem da Publicação**
-- **Contagem de Ocorrências da frase de busca na notícia (título e descrição)**
-- **Valor monetário (Dollars) na notícia (Verdadeiro/Falso)**
+- **URL**
+
 
 
 
