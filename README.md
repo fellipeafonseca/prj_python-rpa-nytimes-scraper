@@ -110,7 +110,7 @@ docker compose up
 ## 🏆 Contribuições
 
 Melhorias futuras para implementação:
-- Criar um microserviço de API + Banco de Dados para salvar os dados extraídos (https://github.com/fellipeafonseca/prj_python-api-nytimes). Deixando uma estrutura dessa forma:
+~~ - Criar um microserviço de API + Banco de Dados para salvar os dados extraídos (https://github.com/fellipeafonseca/prj_python-api-nytimes). Deixando uma estrutura dessa forma:~~
 
 ```  
 - [ Scraper (Docker + Selenium) ]
@@ -124,10 +124,10 @@ Melhorias futuras para implementação:
               ▼
         Banco de Dados
 ```
-  
+~~
+
 - Estruturação melhor do reframework separando as responsabilidades em novas classes;
 
 Fique à vontade para abrir um **Pull Request** ou relatar problemas na aba **Issues**!
 
-🔗 **GitHub:** https://github.com/fellipeafonseca/prj_python-automacao-noticias-newYorkTimes
 
